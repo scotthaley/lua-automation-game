@@ -1,6 +1,9 @@
-﻿namespace LuaAutomationGame.Components.GameEngine;
+﻿using MoonSharp.Interpreter;
+
+namespace LuaAutomationGame.Components.GameEngine;
 
 public struct ScriptableComponent
 {
-    public string Script { get; set; }
+    public string ScriptText { get; set; }
+    public Script Script { get; set; }
 }
