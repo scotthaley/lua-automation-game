@@ -1,6 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 
-namespace LuaAutomationGame.Components;
+namespace LuaAutomationGame.Components.Core;
 
 public struct TransformComponent
 {

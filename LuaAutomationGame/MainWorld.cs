@@ -1,7 +1,7 @@
 ﻿using System;
 using DefaultEcs;
 using DefaultEcs.System;
-using LuaAutomationGame.Components;
+using LuaAutomationGame.Components.Core;
 using LuaAutomationGame.Systems.Renderers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;

@@ -1,6 +1,6 @@
 ﻿using DefaultEcs;
 using DefaultEcs.System;
-using LuaAutomationGame.Components;
+using LuaAutomationGame.Components.Core;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
 using Microsoft.Xna.Framework.Graphics;

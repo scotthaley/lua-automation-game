@@ -1,4 +1,4 @@
-﻿namespace LuaAutomationGame.Components;
+﻿namespace LuaAutomationGame.Components.Core;
 
 public struct SpriteComponent
 {
