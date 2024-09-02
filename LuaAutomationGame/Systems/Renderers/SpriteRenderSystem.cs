@@ -7,19 +7,12 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace LuaAutomationGame.Systems.Renderers;
 
-public class SpriteRenderSystem : AEntitySetSystem<SpriteBatch>
+public class SpriteRenderSystem(World world, ContentManager content)
+    : AEntitySetSystem<SpriteBatch>(world.GetEntities().With<TransformComponent>().With<SpriteComponent>().AsSet())
 {
-    private readonly ContentManager _contentManager;
-    
-    public SpriteRenderSystem(World world, ContentManager content) : base(
-        world.GetEntities().With<TransformComponent>().With<SpriteComponent>().AsSet())
-    {
-        _contentManager = content;
-    }
-    
     protected override void Update(SpriteBatch state, in Entity entity)
     {
-        RenderSprite(state, entity, _contentManager);
+        RenderSprite(state, entity, content);
     }
     
     public static void RenderSprite(SpriteBatch state, in Entity entity, ContentManager contentManager)

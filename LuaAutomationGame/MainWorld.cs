@@ -2,6 +2,8 @@
 using DefaultEcs;
 using DefaultEcs.System;
 using LuaAutomationGame.Components.Core;
+using LuaAutomationGame.Components.GameEngine;
+using LuaAutomationGame.Systems.GameSystems;
 using LuaAutomationGame.Systems.Renderers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Content;
@@ -12,12 +14,13 @@ namespace LuaAutomationGame;
 
 public class MainWorld : IDisposable
 {
-    private GraphicsDevice _graphicsDevice;
+    private readonly GraphicsDevice _graphicsDevice;
     private readonly World _world;
     private readonly OrthographicCamera _camera;
     
     // systems
     private readonly ISystem<SpriteBatch> _mainDrawSystem;
+    private readonly ISystem<float> _scriptSystem;
     
     public MainWorld(GraphicsDevice graphicsDevice, ContentManager content)
     {
@@ -28,6 +31,7 @@ public class MainWorld : IDisposable
         _camera = new OrthographicCamera(graphicsDevice);
         
         _mainDrawSystem = new SequentialSystem<SpriteBatch>(new SpriteRenderSystem(_world, content));
+        _scriptSystem = new SequentialSystem<float>(new ScriptablesSystem(_world));
     }
     
     public void Initialize()
@@ -35,10 +39,19 @@ public class MainWorld : IDisposable
         var testDrone = _world.CreateEntity();
         testDrone.Set(new TransformComponent { Position = new Vector2(100, 100) });
         testDrone.Set(new SpriteComponent { TextureName = "Sprites/drone" });
+        testDrone.Set(new ScriptableComponent
+        {
+            Script = """
+                     function update()
+                         print('Updating drone...')
+                     end
+                     """
+        });
     }
     
     public void Update(float deltaTime)
     {
+        _scriptSystem.Update(deltaTime);
     }
     
     public void Draw(SpriteBatch spriteBatch, float deltaTime)
