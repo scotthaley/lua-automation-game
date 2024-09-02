@@ -1,7 +1,6 @@
 ﻿using System;
 using DefaultEcs;
 using DefaultEcs.System;
-using LuaAutomationGame.Components.Core;
 using LuaAutomationGame.Components.GameEngine;
 using Microsoft.Xna.Framework;
 using MoonSharp.Interpreter;
@@ -22,6 +21,7 @@ public class ScriptablesSystem(World world)
 
                 script.Globals["print"] = (Func<string, bool>)Log;
                 script.Globals["navigate"] = (Func<int, int, bool>)((x, y) => Navigate(copiedEntity, x, y));
+                script.Globals["is_navigating"] = (Func<bool>)(() => IsNavigating(copiedEntity));
 
                 script.DoString(entity.Get<ScriptableComponent>().ScriptText);
                 entity.Get<ScriptableComponent>().Script = script;
@@ -43,10 +43,15 @@ public class ScriptablesSystem(World world)
 
     private static bool Navigate(Entity entity, int x, int y)
     {
-        if (!entity.Has<TransformComponent>()) return false;
+        if (!entity.Has<NavigationComponent>()) return false;
 
-        ref var transform = ref entity.Get<TransformComponent>();
-        transform.Position = new Vector2(x, y);
+        ref var transform = ref entity.Get<NavigationComponent>();
+        transform.Target = new Vector2(x, y);
         return true;
+    }
+
+    private static bool IsNavigating(Entity entity)
+    {
+        return entity.Has<NavigationComponent>() && entity.Get<NavigationComponent>().Target.HasValue;
     }
 }

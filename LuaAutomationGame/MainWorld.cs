@@ -19,6 +19,7 @@ public class MainWorld : IDisposable
 
     // systems
     private readonly ISystem<SpriteBatch> _mainDrawSystem;
+    private readonly ISystem<float> _mainGameSystem;
     private readonly ISystem<float> _scriptSystem;
     private readonly World _world;
 
@@ -32,11 +33,14 @@ public class MainWorld : IDisposable
 
         _mainDrawSystem = new SequentialSystem<SpriteBatch>(new SpriteRenderSystem(_world, content));
         _scriptSystem = new SequentialSystem<float>(new ScriptablesSystem(_world));
+        _mainGameSystem = new SequentialSystem<float>(new NavigationSystem(_world));
     }
 
     public void Dispose()
     {
         _mainDrawSystem.Dispose();
+        _scriptSystem.Dispose();
+        _mainGameSystem.Dispose();
         _world.Dispose();
     }
 
@@ -45,16 +49,14 @@ public class MainWorld : IDisposable
         var testDrone = _world.CreateEntity();
         testDrone.Set(new TransformComponent { Position = new Vector2(100, 100) });
         testDrone.Set(new SpriteComponent { TextureName = "Sprites/drone" });
+        testDrone.Set(new NavigationComponent());
         testDrone.Set(new ScriptableComponent
         {
             ScriptText = """
-                         local timer = 0
+                         navigate(math.random(100, 800), math.random(100, 800))
 
                          function update(delta)
-                            timer = timer + delta
-                            
-                            if (timer > 3) then
-                                timer = 0
+                            if (not is_navigating()) then
                                 navigate(math.random(100, 800), math.random(100, 800))
                             end
                          end
@@ -65,6 +67,7 @@ public class MainWorld : IDisposable
     public void Update(float deltaTime)
     {
         _scriptSystem.Update(deltaTime);
+        _mainGameSystem.Update(deltaTime);
     }
 
     public void Draw(SpriteBatch spriteBatch, float deltaTime)
