@@ -13,8 +13,7 @@ public class NavigationSystem(World world)
         ref var navigation = ref entity.Get<NavigationComponent>();
         if (!navigation.Target.HasValue) return;
 
-
-        var target = navigation.Target.Value;
+        var target = navigation.Target.Value * GameConstants.GridSize;
         var direction = target - entity.Get<TransformComponent>().Position;
         var distance = direction.LengthSquared();
         direction.Normalize();
@@ -41,6 +40,9 @@ public class NavigationSystem(World world)
             entity.Get<TransformComponent>().Position = target;
             navigation.Target = null;
             navigation.Speed = 0;
+
+            entity.Set(new GridPositionComponent
+                { X = (int)(target.X / GameConstants.GridSize), Y = (int)(target.Y / GameConstants.GridSize) });
         }
     }
 }

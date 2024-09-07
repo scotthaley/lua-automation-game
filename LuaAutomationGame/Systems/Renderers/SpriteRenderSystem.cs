@@ -14,27 +14,28 @@ public class SpriteRenderSystem(World world, ContentManager content)
     {
         RenderSprite(state, entity, content);
     }
-    
+
     public static void RenderSprite(SpriteBatch state, in Entity entity, ContentManager contentManager)
     {
         var transformPos = entity.Get<TransformComponent>().Position;
-        
+
         RenderSprite(state, transformPos, entity, contentManager);
     }
-    
-    public static void RenderSprite(SpriteBatch state, Vector2 transformPos, in Entity entity, ContentManager contentManager)
+
+    public static void RenderSprite(SpriteBatch state, Vector2 transformPos, in Entity entity,
+        ContentManager contentManager)
     {
         var sprite = entity.Get<SpriteComponent>();
         if (sprite.TextureName == null) return;
-        
+
         var texture = contentManager.Load<Texture2D>(sprite.TextureName);
 
         var width = texture.Width;
         var height = texture.Height;
         var sourceRectangle = new Rectangle(0, 0, width, height);
-        
-        var origin = Vector2.Zero;
-        
+
+        var origin = Vector2.One / 2 * new Vector2(sourceRectangle.Width, sourceRectangle.Height);
+
         state.Draw(texture, transformPos, sourceRectangle, Color.White, 0f, origin, 1f, SpriteEffects.None, 0f);
     }
 }

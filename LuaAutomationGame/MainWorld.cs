@@ -3,6 +3,7 @@ using DefaultEcs;
 using DefaultEcs.System;
 using LuaAutomationGame.Components.Core;
 using LuaAutomationGame.Components.GameEngine;
+using LuaAutomationGame.Items.Ore;
 using LuaAutomationGame.Systems.GameSystems;
 using LuaAutomationGame.Systems.Renderers;
 using Microsoft.Xna.Framework;
@@ -33,7 +34,11 @@ public class MainWorld : IDisposable
 
         _mainDrawSystem = new SequentialSystem<SpriteBatch>(new SpriteRenderSystem(_world, content));
         _scriptSystem = new SequentialSystem<float>(new ScriptablesSystem(_world));
-        _mainGameSystem = new SequentialSystem<float>(new NavigationSystem(_world));
+        _mainGameSystem = new SequentialSystem<float>(
+            new NavigationSystem(_world),
+            new GridPositionSystem(_world),
+            new InventorySystem(_world)
+        );
     }
 
     public void Dispose()
@@ -46,18 +51,30 @@ public class MainWorld : IDisposable
 
     public void Initialize()
     {
+        var testMine = _world.CreateEntity();
+        testMine.Set(new TransformComponent());
+        testMine.Set(new GridPositionComponent { X = 10, Y = 8 });
+        testMine.Set(new SpriteComponent { TextureName = "Sprites/mine-placeholder" });
+        testMine.Set(new InventoryComponent
+        {
+            Items = [new ItemIronOre(64)],
+            MaxItems = 6
+        });
+
         var testDrone = _world.CreateEntity();
-        testDrone.Set(new TransformComponent { Position = new Vector2(100, 100) });
+        testDrone.Set(new TransformComponent());
+        testDrone.Set(new GridPositionComponent());
         testDrone.Set(new SpriteComponent { TextureName = "Sprites/drone" });
         testDrone.Set(new NavigationComponent());
+        testDrone.Set(new InventoryComponent(6));
         testDrone.Set(new ScriptableComponent
         {
             ScriptText = """
-                         navigate(math.random(100, 800), math.random(100, 800))
+                         navigate(10, 8)
 
                          function update(delta)
-                            if (not is_navigating()) then
-                                navigate(math.random(100, 800), math.random(100, 800))
+                            if (not is_navigating() and not is_extracting()) then
+                                extract()
                             end
                          end
                          """

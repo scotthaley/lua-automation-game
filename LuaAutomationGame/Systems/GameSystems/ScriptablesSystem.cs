@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Linq;
 using DefaultEcs;
 using DefaultEcs.System;
+using LuaAutomationGame.Components.Core;
 using LuaAutomationGame.Components.GameEngine;
 using Microsoft.Xna.Framework;
 using MoonSharp.Interpreter;
@@ -22,6 +24,8 @@ public class ScriptablesSystem(World world)
                 script.Globals["print"] = (Func<string, bool>)Log;
                 script.Globals["navigate"] = (Func<int, int, bool>)((x, y) => Navigate(copiedEntity, x, y));
                 script.Globals["is_navigating"] = (Func<bool>)(() => IsNavigating(copiedEntity));
+                script.Globals["extract"] = (Func<bool>)(() => ExtractInventory(copiedEntity));
+                script.Globals["is_extracting"] = (Func<bool>)(() => IsExtracting(copiedEntity));
 
                 script.DoString(entity.Get<ScriptableComponent>().ScriptText);
                 entity.Get<ScriptableComponent>().Script = script;
@@ -53,5 +57,32 @@ public class ScriptablesSystem(World world)
     private static bool IsNavigating(Entity entity)
     {
         return entity.Has<NavigationComponent>() && entity.Get<NavigationComponent>().Target.HasValue;
+    }
+
+    private static bool ExtractInventory(Entity entity)
+    {
+        if (!entity.Has<InventoryComponent>()) return false;
+        if (!entity.Has<GridPositionComponent>()) return false;
+
+        ref var inventory = ref entity.Get<InventoryComponent>();
+        var gridPosition = entity.Get<GridPositionComponent>();
+
+        var entitiesAtPosition =
+            entity.World.GetEntities().With<InventoryComponent>().AsMultiMap<GridPositionComponent>()[gridPosition]
+                .ToArray();
+
+        var entitiesToCheck = entitiesAtPosition.Where(e => e != entity).ToArray();
+        if (entitiesToCheck.Length == 0) return false;
+
+        var inventoryEntity = entitiesToCheck.First();
+        inventory.ExtractionEntity = inventoryEntity;
+        inventory.IsExtracting = true;
+
+        return true;
+    }
+
+    private static bool IsExtracting(Entity entity)
+    {
+        return entity.Has<InventoryComponent>() && entity.Get<InventoryComponent>().IsExtracting;
     }
 }
